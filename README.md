@@ -36,28 +36,28 @@
   The Temperature raster will be in Celsius.
   </div>
 
-### ADD TOOL TO ARCGIS PRO PROJECT:
-
--Download the tool as a zip file, unzip to directory of choosing
-<br>-In catalog in ArcGIS Pro, open toolboxes
-<br>-RIGHT CLICK, ADD TOOLBOX
-<br>-NAVIGATE TO LST_FROMLANDSAT8 TOOLBOX
-<br>-CLICK OK
-<br>-OPEN GEOPROCESSING, SEARCH FOR LST FROM LANDSAT8
-<br>-OPEN SCRIPT
-<br>-ENTER WORKSPACE GDB
-<br>-ENTER BANDS (4,5,10,11)
-<br>-ENTER METADATA FILE, MTL FILE (NOT ANG)
-<br>-CLIP RASTERS IF DESIRED
+### How To Add the Tool to ArcGIS:
+  <br>-Download the tool as a zip file, unzip to directory of choosing
+  <br>-In catalog in ArcGIS Pro, open toolboxes
+  <br>-Right click, add toolbox
+  <br>-Navigate to the LST_FROMLANDSAT8 toolbox
+  <br>-Click ok
+  <br>-In the map pane, open geoprocessing, search for Land Surface Temperature
+  <br>-Open Script
+  <br>-Enter Workspace GDB
+  <br>-Enter band paths (4,5,10,11)
+  <br>-Enter Metadata file path, <b>MTL FILE (NOT ANG)</b>
+  <br>-Clip rasters if desired
 
   THE SCRIPT WILL OUTPUT TWO RASTERS: 'estLST_TIMGMT_DATE' AND 'NDVI'
 
 ### Important Notes / Known Issues
--Make sure you use the _MTL.txt metadata file and NOT the _ANG.txt metadata file.
+-Make sure you use the MTL.txt metadata file and NOT the ANG.txt metadata file.
 
--There is a known issue with ArcGIS Pro not being able to see the MTL text file, it will instead only be able to find the ANG metadata file within the directory. To fix this, change the MTL file's name. Just adding a _ somewhere in the file name will enable ArcGIS Pro to find it within the directory. This seems to happen the majority of the time, so this will need to be done before using the tool.
+-ArcGIS Pro may not being able to see the MTL metadata text file, it will instead only be able to find the ANG metadata file within the directory. To fix this, change the MTL file's name. Just adding a _ somewhere in the file name will enable ArcGIS Pro to find it within the directory. This seems to happen the majority of the time, so this will need to be done before using the tool.
 
 ### Built With
+* [Numpy](https://numpy.org/)
 * [Arcpy](https://desktop.arcgis.com/en/arcmap/10.3/analyze/arcpy/a-quick-tour-of-arcpy.htm)
 * [ArcGIS Pro](https://pro.arcgis.com/en/pro-app/get-started/get-started.htm)
 
