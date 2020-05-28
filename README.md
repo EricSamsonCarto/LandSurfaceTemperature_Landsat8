@@ -52,10 +52,10 @@
 
   THE SCRIPT WILL OUTPUT TWO RASTERS: 'estLST_TIMGMT_DATE' AND 'NDVI'
 
-### Important Notes
+### Important Notes / Known Issues
 -Make sure you use the _MTL.txt metadata file and NOT the _ANG.txt metadata file.
 
-<br>-There is a known issue with ArcGIS Pro not being able to "see" the MTL text file, it will instead only be able to find the ANG metadata file within the directory. To fix this, change the MTL file's name. Just adding a _ somewhere in the file name will enable ArcGIS Pro to find it within the directory. This seems to happen the majority of the time, so this will need to be done before using the tool.
+-There is a known issue with ArcGIS Pro not being able to see the MTL text file, it will instead only be able to find the ANG metadata file within the directory. To fix this, change the MTL file's name. Just adding a _ somewhere in the file name will enable ArcGIS Pro to find it within the directory. This seems to happen the majority of the time, so this will need to be done before using the tool.
 
 ### Built With
 * [Arcpy](https://desktop.arcgis.com/en/arcmap/10.3/analyze/arcpy/a-quick-tour-of-arcpy.htm)
