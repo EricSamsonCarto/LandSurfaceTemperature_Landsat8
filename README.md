@@ -29,8 +29,8 @@
   to calculate the Land Surface Emissivity (LSE), which is then used to 
   estimate the LST.
   
-  Ouput Rasters Nomenclature: 'estLST_184457GMT_20200403' 
-                                         |
+  Ouput Rasters Nomenclature: estLST_184457GMT_20200403 
+                                         =
       *estimated Land Surface Temperature_Time Acquired in GMT_Date Acquired*
 
   The Temperature raster will be in Celsius.
