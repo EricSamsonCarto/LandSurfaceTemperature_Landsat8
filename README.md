@@ -36,7 +36,7 @@
   </div>
 
 ### How To Add the Tool to ArcGIS:
-  <br>-Download the tool as a zip file, unzip to directory of choosing
+  -Download the tool as a zip file, unzip to directory of choosing
   <br>-In catalog in ArcGIS Pro, open toolboxes
   <br>-Right click, add toolbox
   <br>-Navigate to the LST_FROMLANDSAT8 toolbox
