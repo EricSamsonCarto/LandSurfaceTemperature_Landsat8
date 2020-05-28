@@ -27,13 +27,12 @@
   for the equations within the script. It outputs two rasters, a Land Surface
   Temperature (LST) raster and an NDVI raster. The NDVI raster is created 
   to calculate the Land Surface Emissivity (LSE), which is then used to 
-  estimate the LST.
+  estimate the LST. The Temperature raster will be in Celsius.
   
   Ouput Rasters Nomenclature: estLST_184457GMT_20200403 
                                          =
       *estimated Land Surface Temperature_Time Acquired in GMT_Date Acquired*
 
-  The Temperature raster will be in Celsius.
   </div>
 
 ### How To Add the Tool to ArcGIS:
