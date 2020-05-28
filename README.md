@@ -5,7 +5,7 @@
 
   <p align="center">
     An ArcGIS Pro Arcpy toolbox that estimates land surface temperature using Landsat 8 bands.<br>
-    Project Description page:<br>
+    FOR MORE INFORMATION, Visit the Project Description Page:<br>
   <a href='#'>Land Surface Temperature</a>
   </p>
 </p>
