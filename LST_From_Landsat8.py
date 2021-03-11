@@ -1,7 +1,5 @@
 import os
-#import arcgis
 import arcpy
-#from arcpy import env
 from arcpy.sa import *
 import numpy
 
