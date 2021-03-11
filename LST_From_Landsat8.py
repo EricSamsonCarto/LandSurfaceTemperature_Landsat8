@@ -1,7 +1,7 @@
 import os
-import arcgis
+#import arcgis
 import arcpy
-from arcpy import env
+#from arcpy import env
 from arcpy.sa import *
 import numpy
 
@@ -20,127 +20,101 @@ import numpy
   estimate the LST.
   
   Ouput Rasters Nomenclature: 'estLST_184457GMT_20200403' 
-                                         |
-      *estimated Land Surface Temperature_Time Acquired in GMT_Date Acquired*
+  *estimated Land Surface Temperature_Time Acquired in GMT_Date Acquired*
 
-  The Temperature raster will be in Celsius.
-
-  For more information regarding this script, visit:
-  !website!
-  https://github.com/EricSamsonCarto/LandSurfaceTemperature_FromLANDSAT8
+  The Temperature raster will be in celsius.
 
   Created By:  Eric Samson.
   Date:        5/21/2020.
+  Last Update: 3/10/2020.
 ------------------------------------------------------------------"""
 def main():
-	#Variables from User
 
-	#workspace GDB
-	inGDB = arcpy.GetParameterAsText(0)
-	arcpy.env.workspace = inGDB
+	#workspace GDB, use default GDB
+	aprx = arcpy.mp.ArcGISProject('CURRENT')
+	aprxMap = aprx.listMaps()[0]
+	gdb_path = aprx.defaultGeodatabase
+
 	arcpy.env.overwriteOutput = True
 	arcpy.env.addOutputsToMap = False
 
-	B4 = arcpy.GetParameterAsText(1)
-	B5 = arcpy.GetParameterAsText(2)
-	B10 = arcpy.GetParameterAsText(3)
-	B11 = arcpy.GetParameterAsText(4)
+	B4 = arcpy.GetParameterAsText(0)
+	B5 = arcpy.GetParameterAsText(1)
+	B10 = arcpy.GetParameterAsText(2)
+	B11 = arcpy.GetParameterAsText(3)
 
 	#metadata File
-	metadata = arcpy.GetParameterAsText(5)
+	metadata = arcpy.GetParameterAsText(4)
 
 	#Optional
-	clipOption = arcpy.GetParameterAsText(6)
-	Clip_Feature = arcpy.GetParameterAsText(7)
+	clipOption = arcpy.GetParameterAsText(5)
+	Clip_Feature = arcpy.GetParameterAsText(6)
 
 #-------------------------------------------------------------------------------------
 
 	#Clip Rasters if user requests
 
 	if clipOption == 'true':
-		B4_Clip = arcpy.sa.ExtractByMask(B4, Clip_Feature); B4_Clip.save(os.path.join(inGDB,'B4_Clip'))
-		B4 = os.path.join(inGDB,'B4_Clip')
-		B5_Clip = arcpy.sa.ExtractByMask(B5, Clip_Feature); B5_Clip.save(os.path.join(inGDB,'B5_Clip'))
-		B5 = os.path.join(inGDB,'B5_Clip')
-		B10_Clip = arcpy.sa.ExtractByMask(B10, Clip_Feature); B10_Clip.save(os.path.join(inGDB,'B10_Clip'))
-		B10 = os.path.join(inGDB,'B10_Clip')
-		B11_Clip = arcpy.sa.ExtractByMask(B11, Clip_Feature); B11_Clip.save(os.path.join(inGDB,'B11_Clip'))
-		B11 = os.path.join(inGDB,'B11_Clip')
-
+		B4_Clip = arcpy.sa.ExtractByMask(B4, Clip_Feature); B4_Clip.save(os.path.join(gdb_path,'B4_Clip'))
+		B4 = os.path.join(gdb_path,'B4_Clip')
+		B5_Clip = arcpy.sa.ExtractByMask(B5, Clip_Feature); B5_Clip.save(os.path.join(gdb_path,'B5_Clip'))
+		B5 = os.path.join(gdb_path,'B5_Clip')
+		B10_Clip = arcpy.sa.ExtractByMask(B10, Clip_Feature); B10_Clip.save(os.path.join(gdb_path,'B10_Clip'))
+		B10 = os.path.join(gdb_path,'B10_Clip')
+		B11_Clip = arcpy.sa.ExtractByMask(B11, Clip_Feature); B11_Clip.save(os.path.join(gdb_path,'B11_Clip'))
+		B11 = os.path.join(gdb_path,'B11_Clip')
 
 #-------------------------------------------------------------------------------------
 
 	#Scrap metadata for variables needed
-	scrap_lines = []
+	variable_name_list = ['DATE_ACQUIRED', 'SCENE_CENTER_TIME', 'SUN_ELEVATION',
+					      'RADIANCE_MULT_BAND_10', 'RADIANCE_MULT_BAND_11', 'RADIANCE_ADD_BAND_10',
+					      'RADIANCE_ADD_BAND_11', 'REFLECTANCE_MULT_BAND_4', 'REFLECTANCE_MULT_BAND_5', 
+					      'REFLECTANCE_ADD_BAND_4', 'REFLECTANCE_ADD_BAND_5', 'K1_CONSTANT_BAND_10',
+					      'K2_CONSTANT_BAND_10', 'K1_CONSTANT_BAND_11', 'K2_CONSTANT_BAND_11']
 
+	scrap_lines = []
 	with open(metadata, 'r') as list_file:
 		for x in list_file:
-			if 'DATE_ACQUIRED' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'SCENE_CENTER_TIME' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'SUN_ELEVATION' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'REFLECTANCE_MULT_BAND_4' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'REFLECTANCE_ADD_BAND_4' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'REFLECTANCE_MULT_BAND_5' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'REFLECTANCE_ADD_BAND_5' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'RADIANCE_MULT_BAND_10' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'RADIANCE_MULT_BAND_11' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'RADIANCE_ADD_BAND_10' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'RADIANCE_ADD_BAND_11' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'K1_CONSTANT_BAND_10' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'K2_CONSTANT_BAND_10' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'K1_CONSTANT_BAND_11' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
-			if 'K2_CONSTANT_BAND_11' in x:
-				scrap_lines.append(x.rstrip('\n').strip())
+			for variable in variable_name_list:
+				if variable in x:
+					arcpy.AddMessage(x)
+					scrap_lines.append(x.rstrip('\n').strip())
 
 	scrap_lines_clean = []
-
 	for x in scrap_lines:
 		scrap_lines_clean.append(x.split('=')[1].strip())
 
+	arcpy.AddMessage(scrap_lines)
+
+	#Clean up the dates:
 	DATE_ACQUIRED = scrap_lines_clean[0].replace('-', '')
 	SCENE_CENTER_TIME1 = scrap_lines_clean[1][1:-1]
 	SCENE_CENTER_TIME = SCENE_CENTER_TIME1.split('.')[0].replace(':', '')
-	SUN_ELEVATION = float(scrap_lines_clean[2])
-	RADIANCE_MULT_BAND_10 = float(scrap_lines_clean[3])
-	RADIANCE_MULT_BAND_11 = float(scrap_lines_clean[4])
-	RADIANCE_ADD_BAND_10 = float(scrap_lines_clean[5])
-	RADIANCE_ADD_BAND_11 = float(scrap_lines_clean[6])
-	REFLECTANCE_MULT_BAND_4 = float(scrap_lines_clean[7])
-	REFLECTANCE_MULT_BAND_5 = float(scrap_lines_clean[8])
-	REFLECTANCE_ADD_BAND_4 = float(scrap_lines_clean[9])
-	REFLECTANCE_ADD_BAND_5 = float(scrap_lines_clean[10])
-	K1_CONSTANT_BAND_10 = float(scrap_lines_clean[11])
-	K2_CONSTANT_BAND_10 = float(scrap_lines_clean[12])
-	K1_CONSTANT_BAND_11 = float(scrap_lines_clean[13])
-	K2_CONSTANT_BAND_11 = float(scrap_lines_clean[14])
 
+	#remove time variables
+	noDates_variable_name_list = variable_name_list[2:]
+	noDates_scraped_data = scrap_lines_clean[2:]
+	floats_variable_list = [float(i) for i in noDates_scraped_data]
+
+	#create dictionary of variables
+	variables_dict = dict(zip(noDates_variable_name_list, floats_variable_list)) 
+
+	arcpy.AddMessage(variables_dict)
+	
 	#Correct Sun Elevation
-	sin_sun_elev = numpy.sin(numpy.deg2rad(SUN_ELEVATION))
+	sin_sun_elev = numpy.sin(numpy.deg2rad(variables_dict['SUN_ELEVATION']))
 	corrected_sun_elev = float(sin_sun_elev)
 #-------------------------------------------------------------------------------------
 
 	#Calculate NDVI
 
 	#Calculate Red Band and NIR band, corrected with sun elevation. Create NDVI based off of these rasters
-	RED_REF = ((REFLECTANCE_MULT_BAND_4 * Raster(B4)) - REFLECTANCE_ADD_BAND_4) / (corrected_sun_elev)
-	NIR_REF = ((REFLECTANCE_MULT_BAND_5 * Raster(B5)) - REFLECTANCE_ADD_BAND_5) / (corrected_sun_elev)
+	RED_REF = ((variables_dict['REFLECTANCE_MULT_BAND_4'] * Raster(B4)) - variables_dict['REFLECTANCE_ADD_BAND_4']) / (corrected_sun_elev)
+	NIR_REF = ((variables_dict['REFLECTANCE_MULT_BAND_5'] * Raster(B5)) - variables_dict['REFLECTANCE_ADD_BAND_5']) / (corrected_sun_elev)
 
 	NDVI_REF = (Float(NIR_REF - RED_REF)) / (Float(NIR_REF + RED_REF))
-	NDVI_PATH = os.path.join(inGDB,'NDVI')
+	NDVI_PATH = os.path.join(gdb_path,'NDVI')
 	NDVI_REF.save(NDVI_PATH)
 
 	NDVI = NDVI_PATH
@@ -158,11 +132,14 @@ def main():
 	#Calculate LST
 
 	#Using band 10 and 11, calculate radiance and brightness temp:
-	BAND_10_RADIANCE = ((RADIANCE_MULT_BAND_10 * Raster(B10)) + RADIANCE_ADD_BAND_10)
-	BAND_11_RADIANCE = ((RADIANCE_MULT_BAND_11 * Raster(B11)) + RADIANCE_ADD_BAND_11)
+	BAND_10_RADIANCE = ((variables_dict['RADIANCE_MULT_BAND_10'] * Raster(B10)) + variables_dict['RADIANCE_ADD_BAND_10'])
+	BAND_11_RADIANCE = ((variables_dict['RADIANCE_MULT_BAND_11'] * Raster(B11)) + variables_dict['RADIANCE_ADD_BAND_11'])
 
-	BAND10SATTEMP = ((K2_CONSTANT_BAND_10 / Ln((K1_CONSTANT_BAND_10/BAND_10_RADIANCE + 1)) - 272.15))
-	BAND11SATTEMP = ((K2_CONSTANT_BAND_11 / Ln((K1_CONSTANT_BAND_11/BAND_11_RADIANCE + 1)) - 272.15))
+	BAND10SATTEMP = ((variables_dict['K2_CONSTANT_BAND_10'] / Ln((variables_dict['K1_CONSTANT_BAND_10']/BAND_10_RADIANCE + 1)) - 272.15))
+	BAND11SATTEMP = ((variables_dict['K2_CONSTANT_BAND_11'] / Ln((variables_dict['K1_CONSTANT_BAND_11']/BAND_11_RADIANCE + 1)) - 272.15))
+
+	arcpy.AddMessage(arcpy.management.GetRasterProperties(BAND10SATTEMP, "MAXIMUM", ''))
+	arcpy.AddMessage(arcpy.management.GetRasterProperties(BAND11SATTEMP, "MAXIMUM", ''))
 
 	#Calculate Prop VEG using NDVI's min max, Use propveg to calculate the LSE:
 	PROPVEG = Square(((Raster(NDVI)) - (NDVI_min)) / ((NDVI_max - (NDVI_min))))
@@ -176,13 +153,10 @@ def main():
 	#Find mean LST:
 	LST_MEAN_11_10 = (BAND10LST + BAND11LST)/2
 
-	LST_MEAN_PATH = os.path.join(inGDB,'estLST_' + SCENE_CENTER_TIME + 'GMT_' + DATE_ACQUIRED)
+	LST_MEAN_PATH = os.path.join(gdb_path,'estLST_' + SCENE_CENTER_TIME + 'GMT_' + DATE_ACQUIRED)
 	LST_MEAN_11_10.save(LST_MEAN_PATH)
 
 	#Add NDVI and LST to map:
-	aprx = arcpy.mp.ArcGISProject("CURRENT")
-	aprxMap = aprx.listMaps()[0]
-
 	aprxMap.addDataFromPath(NDVI_PATH)
 	aprxMap.addDataFromPath(LST_MEAN_PATH)
 if __name__ == "__main__":
