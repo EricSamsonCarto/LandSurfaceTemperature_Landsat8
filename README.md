@@ -13,9 +13,9 @@
 
 <!-- ABOUT THE PROJECT -->
 <div align="center">
-  
-<img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/3352342/tool.JPG" width="400px">
-  
+  <br>
+<img src="https://assets.codepen.io/3352342/LST_tool.JPG" />
+  <br>
 </div>
 
   Description: This script estimates the LST and the NDISI of a user's 
