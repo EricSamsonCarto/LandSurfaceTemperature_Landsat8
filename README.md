@@ -14,7 +14,7 @@
 <!-- ABOUT THE PROJECT -->
 <div align="center">
   
-<img src="https://assets.codepen.io/3352342/LST_tool.JPG"/>
+<img src="screenshot.JPG"/>
 
 </div>
 
