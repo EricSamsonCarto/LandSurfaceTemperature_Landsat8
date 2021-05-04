@@ -13,8 +13,11 @@
 
 <!-- ABOUT THE PROJECT -->
 <div align="center">
-<img src="https://assets.codepen.io/3352342/LST_tool.JPG" />
+  
+<img src="https://assets.codepen.io/3352342/LST_tool.JPG"/>
+
 </div>
+
 <br>
   Description: This script estimates the LST and the NDISI of a user's 
   inputted Landsat 8 Bands, with optional outputs of NDVI and MNDWI.
