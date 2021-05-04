@@ -14,7 +14,7 @@
 <!-- ABOUT THE PROJECT -->
 <div align="center">
   <br>
-<img src="https://assets.codepen.io/3352342/LST_tool.JPG" />
+![](https://assets.codepen.io/3352342/LST_tool.JPG)
   <br>
 </div>
 
