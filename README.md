@@ -5,6 +5,7 @@
 
   <p align="center">
     An ArcGIS Pro Arcpy toolbox that estimates land surface temperature using Landsat 8 bands.<br>
+    Additionally, it will also calculate NDVI, MNDWI, and NDISI.
     FOR MORE INFORMATION, Visit the Project Description Page:<br>
   <a href='https://ericsamson.com/Python/LandSurfaceTemp/LandSurfaceTemperature.html'>Land Surface Temperature</a>
   </p>
@@ -17,21 +18,23 @@
   
 </div>
 
-  Description: This script estimates the LST of a user's inputted 
-  Landsat 8 Bands. It only works for Landsat 8 bands. The tool requires 
-  path locations to band's 4, 5, 10, and 11. The MTL metadata file associated 
-  with the bands is also required. The zip file of L8 data will contain 
-  the *MTL.txt* file:
+  Description: This script estimates the LST and the NDISI of a user's 
+  inputted Landsat 8 Bands, with optional outputs of NDVI and MNDWI.
+  It only works for Landsat 8 bands. The tool requires a full path to 
+  a folder that contains the band's 3, 4, 5, 6, 10, and 11. The MTL metadata 
+  file associated with the bands is also required. 
+  The zip file of L8 data will contain the *MTL.txt file:
   (Example: LC08_L1TP_147047_20181110_20181127_01_T1_MTL)
-  The script will scrap the metadata file for the neccesary variables needed 
-  for the equations within the script. It outputs two rasters, a Land Surface
-  Temperature (LST) raster and an NDVI raster. The NDVI raster is created 
-  to calculate the Land Surface Emissivity (LSE), which is then used to 
-  estimate the LST. The Temperature raster will be in Celsius.
-  
-  Ouput Rasters Nomenclature: estLST_184457GMT_20200403 
-                                         =
-      *estimated Land Surface Temperature_Time Acquired in GMT_Date Acquired*
+  The script will scrap the metadata file for the necessary variables needed 
+  for the equations within the script.
+
+  Ouput Rasters Nomenclature: 'LST_184457GMT_20200403' 
+  *Estimated Land Surface Temperature_Time Acquired in GMT_Date Acquired*
+
+  The Temperature raster will be in celsius.
+
+  For more documentation and methodology, please visit:
+  https://ericsamson.com/Python/LandSurfaceTemp/LandSurfaceTemperature.html
 
   </div>
 
@@ -41,19 +44,6 @@
   <br>-Right click, add toolbox
   <br>-Navigate to the LST_FROMLANDSAT8 toolbox
   <br>-Click ok
-  <br>-In the map pane, open geoprocessing, search for Land Surface Temperature
-  <br>-Open Script
-  <br>-Enter Workspace GDB
-  <br>-Enter band paths (4,5,10,11)
-  <br>-Enter Metadata file path, <b>MTL FILE (NOT ANG)</b>
-  <br>-Clip rasters if desired
-
-  THE SCRIPT WILL OUTPUT TWO RASTERS: 'estLST_TIMGMT_DATE' AND 'NDVI'
-
-### Important Notes / Known Issues
--Make sure you use the MTL.txt metadata file and NOT the ANG.txt metadata file.
-
--ArcGIS Pro may not being able to see the MTL metadata text file, it will instead only be able to find the ANG metadata file within the directory. To fix this, change the MTL file's name. Just adding a _ somewhere in the file name will enable ArcGIS Pro to find it within the directory. This seems to happen the majority of the time, so this will need to be done before using the tool.
 
 ### Built With
 * [Numpy](https://numpy.org/)
