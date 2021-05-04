@@ -28,12 +28,12 @@
   The script will scrap the metadata file for the necessary variables needed 
   for the equations within the script.
 
-  Ouput Rasters Nomenclature: 'LST_184457GMT_20200403' 
+  Ouput Rasters Nomenclature: 'LST_184457GMT_20200403'<br>
   *Estimated Land Surface Temperature_Time Acquired in GMT_Date Acquired*
 
   The Temperature raster will be in celsius.
 
-  For more documentation and methodology, please visit:
+  For more documentation and methodology, please visit:<br>
   https://ericsamson.com/Python/LandSurfaceTemp/LandSurfaceTemperature.html
 
   </div>
