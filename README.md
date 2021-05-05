@@ -57,7 +57,5 @@ Eric Samson: [@MyTwitter](https://twitter.com/EricSamsonGIS) <br>
 Email: ericsamsonwx@gmail.com <br>
 Website: [EricSamson.com](https://ericsamson.com) <br>
 
-Project Link: [https://github.com/EricSamsonCarto/LandSurfaceTemperature_FromLANDSAT8](https://github.com/EricSamsonCarto/LandSurfaceTemperature_FromLANDSAT8)
-
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/iamericsamson
