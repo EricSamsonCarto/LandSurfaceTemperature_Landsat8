@@ -9,7 +9,6 @@ arcpy.env.addOutputsToMap = False
 
 """----------------------------------------------------------------------
     Script Name: Land Surface Temperature from Landsat8 Bands
-
     Description: This script estimates the LST and the NDISI of a user's 
     inputted Landsat 8 Bands, with optional outputs of NDVI and MNDWI.
     It only works for Landsat 8 bands. The tool requires a full path to 
@@ -29,185 +28,239 @@ arcpy.env.addOutputsToMap = False
     Date:        5/21/2020.
     Last Update: 11/03/2021.
 ------------------------------------------------------------------"""
-aprx = arcpy.mp.ArcGISProject('CURRENT')
-aprxMap = aprx.listMaps()[0]
-gdb_path = aprx.defaultGeodatabase
 
-in_folder = arcpy.GetParameterAsText(0)
+def get_data_fromFolder(in_folder):
+    data_dict = {}
+    for x in os.listdir(in_folder):
+        if x.endswith('B3.TIF'):
+            B3_path = os.path.join(in_folder, x)
+            data_dict['B3'] = B3_path
+        elif x.endswith('B4.TIF'):
+            B4_path = os.path.join(in_folder, x)
+            data_dict['B4'] = B4_path
+        elif x.endswith('B5.TIF'):
+            B5_path = os.path.join(in_folder, x)
+            data_dict['B5'] = B5_path
+        elif x.endswith('B6.TIF'):
+            B6_path = os.path.join(in_folder, x)
+            data_dict['B6'] = B6_path
+        elif x.endswith('B10.TIF'):
+            B10_path = os.path.join(in_folder, x)
+            data_dict['B10'] = B10_path
+        elif x.endswith('B11.TIF'):
+            B11_path = os.path.join(in_folder, x)
+            data_dict['B11'] = B11_path
+        elif x.endswith('MTL.txt'):
+            metadata_path = os.path.join(in_folder, x)
+            data_dict['metadata'] = metadata_path
+    
+    return data_dict
 
-band_noMasks = {}
-
-for x in os.listdir(in_folder):
-    if x.endswith('B3.TIF'):
-        B3_path = os.path.join(in_folder, x)
-        band_noMasks['B3'] = B3_path
-    elif x.endswith('B4.TIF'):
-        B4_path = os.path.join(in_folder, x)
-        band_noMasks['B4'] = B4_path
-    elif x.endswith('B5.TIF'):
-        B5_path = os.path.join(in_folder, x)
-        band_noMasks['B5'] = B5_path
-    elif x.endswith('B6.TIF'):
-        B6_path = os.path.join(in_folder, x)
-        band_noMasks['B6'] = B6_path
-    elif x.endswith('B10.TIF'):
-        B10_path = os.path.join(in_folder, x)
-        band_noMasks['B10'] = B10_path
-    elif x.endswith('B11.TIF'):
-        B11_path = os.path.join(in_folder, x)
-        band_noMasks['B11'] = B11_path
-    elif x.endswith('MTL.txt'):
-        metadata_path = os.path.join(in_folder, x)
-        band_noMasks['metadata'] = metadata_path
-
-B3 = band_noMasks['B3']
-B4 = band_noMasks['B4']
-B5 = band_noMasks['B5']
-B6 = band_noMasks['B6']
-B10 = band_noMasks['B10']
-B11 = band_noMasks['B11']
-metadata = band_noMasks['metadata']
-
-#Optional
-products = arcpy.GetParameterAsText(1)
-products_list = products.split(';')
-Mask_Feature = arcpy.GetParameterAsText(2)
-average_b11 = arcpy.GetParameterAsText(3)
-arcpy.AddMessage(Mask_Feature)
-#-------------------------------------------------------------------------------------
-#Mask Bands
-bands = ['B3', 'B4', 'B5', 'B6', 'B10', 'B11']
-band_masks = {}
-
-if Mask_Feature != '':
+def mask_bands(in_mask_feature, out_gdb, in_bands_datadict):
+    bands = ['B3', 'B4', 'B5', 'B6', 'B10', 'B11']
+    band_masks = {}
     for band in bands:
-        mask_name = band + '_Mask'
-        mask_output_loc = os.path.join(gdb_path,mask_name)
-        mask_extract = arcpy.sa.ExtractByMask(band_noMasks[band], Mask_Feature); mask_extract.save(mask_output_loc)
-        band_masks[band] = mask_output_loc
+        mask_name = f'{band}_Mask'
+        mask_out = os.path.join(out_gdb, mask_name)
+        mask_extract = arcpy.sa.ExtractByMask(in_bands_datadict[band], in_mask_feature)
+        mask_extract.save(mask_out)
+        band_masks[band] = mask_out
 
-    B3 = band_masks['B3']
-    B4 = band_masks['B4']
-    B5 = band_masks['B5']
-    B6 = band_masks['B6']
-    B10 = band_masks['B10']
-    B11 = band_masks['B11']
+def scrape_metadatafile(input_metadata, in_variables):
+    scrape_lines = []
+    with open(metadata, 'r') as metadata_file:
+        for x in metadata_file:
+            for variable in variable_name_list:
+                if variable in x:
+                    scrape_lines.append(x.rstrip('\n').strip())
 
-#-------------------------------------------------------------------------------------
-#Scrap metadata for variables needed
-variable_name_list = ['DATE_ACQUIRED', 'SCENE_CENTER_TIME', 'SUN_ELEVATION',
-                        'RADIANCE_MULT_BAND_10', 'RADIANCE_MULT_BAND_11', 'RADIANCE_ADD_BAND_10',
-                        'RADIANCE_ADD_BAND_11','REFLECTANCE_MULT_BAND_3', 'REFLECTANCE_MULT_BAND_4', 
-                        'REFLECTANCE_MULT_BAND_5', 'REFLECTANCE_MULT_BAND_6','REFLECTANCE_ADD_BAND_3',
-                        'REFLECTANCE_ADD_BAND_4', 'REFLECTANCE_ADD_BAND_5', 'REFLECTANCE_ADD_BAND_6', 
-                        'K1_CONSTANT_BAND_10','K2_CONSTANT_BAND_10', 'K1_CONSTANT_BAND_11', 'K2_CONSTANT_BAND_11']
+    return [x.split('=')[1].strip() for x in scrap_lines]
 
-scrap_lines = []
-with open(metadata, 'r') as list_file:
-    for x in list_file:
-        for variable in variable_name_list:
-            if variable in x:
-                scrap_lines.append(x.rstrip('\n').strip())
+def calculate_MNDWI(in_datadict, in_sun_elev, out_gdb, in_date_acquired, in_scene_center_time):
+    """calculate green band and SWIR1 band, then create MNDWI based off of these rasters"""
+    GREEN_REF = (((in_datadict['REFLECTANCE_MULT_BAND_3'] * Raster(B3)) 
+                - in_datadict['REFLECTANCE_ADD_BAND_3'])
+                /(in_sun_elev))
 
-scrap_lines_clean = [x.split('=')[1].strip() for x in scrap_lines]
+    NIR_REF = (((in_datadict['REFLECTANCE_MULT_BAND_5'] * Raster(B5)) 
+                - in_datadict['REFLECTANCE_ADD_BAND_5'])
+                /(in_sun_elev))
 
-#Clean up the dates:
-DATE_ACQUIRED = scrap_lines_clean[0].replace('-', '')
-SCENE_CENTER_TIME1 = scrap_lines_clean[1][1:-1]
-SCENE_CENTER_TIME = SCENE_CENTER_TIME1.split('.')[0].replace(':', '')
+    SWIR1_REF = (((in_datadict['REFLECTANCE_MULT_BAND_6'] * Raster(B6)) 
+                - in_datadict['REFLECTANCE_ADD_BAND_6'])
+                /(in_sun_elev))
 
-#remove time variables
-noDates_variable_name_list = variable_name_list[2:]
-noDates_scraped_data = scrap_lines_clean[2:]
-floats_variable_list = [float(i) for i in noDates_scraped_data]
+    MNDWI_REF = ((GREEN_REF - SWIR1_REF) 
+                / (GREEN_REF + SWIR1_REF))
 
-#create dictionary of variables
-variables_dict = dict(zip(noDates_variable_name_list, floats_variable_list))
-#Correct Sun Elevation
-sin_sun_elev = numpy.sin(numpy.deg2rad(variables_dict['SUN_ELEVATION']))
-corrected_sun_elev = float(sin_sun_elev)
-#-------------------------------------------------------------------------------------
-#Calculate MNDWI
+    MNDWI_PATH = os.path.join(gdb_path, 
+                            f'MNDWI_{in_scene_center_time}GMT_{in_date_acquired}')
+    MNDWI_REF.save(MNDWI_PATH)
+    MNDWI = MNDWI_PATH
 
-#Calculate Green Band and SWIR1 band, corrected with sun elevation. Create MNDWI based off of these rasters
-GREEN_REF = ((variables_dict['REFLECTANCE_MULT_BAND_3'] * Raster(B3)) - variables_dict['REFLECTANCE_ADD_BAND_3'])/(corrected_sun_elev)
-NIR_REF = ((variables_dict['REFLECTANCE_MULT_BAND_5'] * Raster(B5)) - variables_dict['REFLECTANCE_ADD_BAND_5'])/(corrected_sun_elev)
-SWIR1_REF = ((variables_dict['REFLECTANCE_MULT_BAND_6'] * Raster(B6)) - variables_dict['REFLECTANCE_ADD_BAND_6'])/(corrected_sun_elev)
+    return MNDWI, SWIR1_REF, NIR_REF
 
-MNDWI_REF = (GREEN_REF - SWIR1_REF) / (GREEN_REF + SWIR1_REF)
-MNDWI_PATH = os.path.join(gdb_path, 'MNDWI_' + SCENE_CENTER_TIME + 'GMT_' + DATE_ACQUIRED)
-MNDWI_REF.save(MNDWI_PATH)
+def calculate_NDISI(in_datadict, in_MNDWI, in_SWIR1_REF, in_NIR_REF, out_gdb, in_date_acquired, in_scene_center_time):
+        BAND_10_RADIANCE = (((in_datadict['RADIANCE_MULT_BAND_10'] * Raster(B10)) 
+                            + in_datadict['RADIANCE_ADD_BAND_10']))
+        BAND10SATTEMP = (((in_datadict['K2_CONSTANT_BAND_10'] / 
+                        Ln(((in_datadict['K1_CONSTANT_BAND_10'])/BAND_10_RADIANCE + 1))) 
+                        -273.15))
 
-MNDWI = MNDWI_PATH
+        NDISI = ((BAND10SATTEMP - ((in_MNDWI + in_NIR_REF + in_SWIR1_REF)/3)) 
+                / (BAND10SATTEMP + ((in_MNDWI + in_NIR_REF + in_SWIR1_REF)/3)))
+        NDISI_PATH = os.path.join(out_gdb, 
+                                f'NDISI_{in_scene_center_time}GMT_{in_date_acquired}')
+        NDISI.save(NDISI_PATH)
+        NDISI = NDISI_PATH
 
-#-------------------------------------------------------------------------------------
-#Calculate NDISI
+        return NDISI
 
-#Using band 10, calculate radiance and brightness temp:
-BAND_10_RADIANCE = ((variables_dict['RADIANCE_MULT_BAND_10'] * Raster(B10)) + variables_dict['RADIANCE_ADD_BAND_10'])
-BAND10SATTEMP = ((variables_dict['K2_CONSTANT_BAND_10'] / Ln(((variables_dict['K1_CONSTANT_BAND_10'])/BAND_10_RADIANCE + 1))) -273.15)
+def calculate_NDVI(in_datadict, in_NIR_REF, in_sun_elev, out_gdb, in_date_acquired, in_scene_center_time):
+    """Calculate Red Band and NIR band, corrected with sun elevation. 
+        Create NDVI based off of these rasters"""
+    RED_REF = (((in_datadict['REFLECTANCE_MULT_BAND_4'] * Raster(B4)) 
+                - in_datadict['REFLECTANCE_ADD_BAND_4']) 
+                / (in_sun_elev))
 
-#Calculate NDISI:
-NDISI = (BAND10SATTEMP - ((MNDWI + NIR_REF + SWIR1_REF)/3)) / (BAND10SATTEMP + ((MNDWI + NIR_REF + SWIR1_REF)/3))
-NDISI_PATH = os.path.join(gdb_path, 'NDISI_' + SCENE_CENTER_TIME + 'GMT_' + DATE_ACQUIRED)
-NDISI.save(NDISI_PATH)
+    NDVI_REF = ((Float(in_NIR_REF - RED_REF)) 
+                / (Float(in_NIR_REF + RED_REF)))
 
-NDISI = NDISI_PATH
-#-------------------------------------------------------------------------------------
-#Calculate NDVI
+    NDVI_PATH = os.path.join(out_gdb, 
+                            f'NDVI_{in_scene_center_time}GMT_{in_date_acquired}')
+    NDVI_REF.save(NDVI_PATH)
 
-#Calculate Red Band and NIR band, corrected with sun elevation. Create NDVI based off of these rasters
-RED_REF = ((variables_dict['REFLECTANCE_MULT_BAND_4'] * Raster(B4)) - variables_dict['REFLECTANCE_ADD_BAND_4']) / (corrected_sun_elev)
+    return NDVI_PATH
 
-NDVI_REF = (Float(NIR_REF - RED_REF)) / (Float(NIR_REF + RED_REF))
-NDVI_PATH = os.path.join(gdb_path,'NDVI_' + SCENE_CENTER_TIME + 'GMT_' + DATE_ACQUIRED)
-NDVI_REF.save(NDVI_PATH)
+def get_NDVI_MinOrMax(in_NDVI, max=True):
+        min_max = "MAXIMUM" if max else "MINIMUM"
+        NDVI_PROP = arcpy.management.GetRasterProperties(in_NDVI, min_max, '')
+        NDVI_VALUE = NDVI_PROP.getOutput(0)
+        return float(NDVI_VALUE)
 
-NDVI = NDVI_PATH
+def calculate_sat_temp(in_datadict, in_b11):
+        BAND_11_RADIANCE = (((in_datadict['RADIANCE_MULT_BAND_11'] * 
+                            Raster(in_b11)) + in_datadict['RADIANCE_ADD_BAND_11']))
+        return (in_datadict['K2_CONSTANT_BAND_11'] 
+                / Ln((in_datadict['K1_CONSTANT_BAND_11'] / BAND_11_RADIANCE + 1)) 
+                - 273.15)
 
-#Create variables for the NDVI's max and min values:
-NDVI_min_PROP = arcpy.management.GetRasterProperties(NDVI, "MINIMUM", '')
-NDVI_min_VALUE = NDVI_min_PROP.getOutput(0)
-NDVI_min = float(NDVI_min_VALUE)
+def get_propveg(in_NDVI, in_NDVI_min, in_NDVI_max):
+        return (Square(((Raster(in_NDVI)) - (in_NDVI_min)) 
+                / ((in_NDVI_max - (in_NDVI_min)))))
 
-NDVI_max_PROP = arcpy.management.GetRasterProperties(NDVI, "MAXIMUM", '')
-NDVI_max_VALUE = NDVI_max_PROP.getOutput(0)
-NDVI_max = float(NDVI_max_VALUE)
+def calculate_LSE(in_propveg):
+        return (0.004 * in_propveg) + 0.986
 
+def calculate_LST(in_B10_sat_temp, in_B11_sat_temp, in_LSE):
+        BAND10LST = (in_B10_sat_temp / 
+                    (1 + (10.895 * (in_B10_sat_temp/14380)) 
+                    * (Ln(in_LSE))))
+        BAND11LST = (in_B11_sat_temp / 
+                    (1 + (12.005 * (in_B11_sat_temp/14380)) 
+                    * (Ln(in_LSE))))
 
-#-------------------------------------------------------------------------------------
-#Calculate LST
+        return BAND10LST, BAND11LST
 
-#Using band 11, calculate radiance and brightness temp:
-BAND_11_RADIANCE = ((variables_dict['RADIANCE_MULT_BAND_11'] * Raster(B11)) + variables_dict['RADIANCE_ADD_BAND_11'])
-BAND11SATTEMP = ((variables_dict['K2_CONSTANT_BAND_11'] / Ln((variables_dict['K1_CONSTANT_BAND_11']/BAND_11_RADIANCE + 1)) - 273.15))
+if __name__ == "__main__":
+    aprxMap = arcpy.mp.ArcGISProject('CURRENT').listMaps()[0]
+    gdb_path = aprx.defaultGeodatabase
 
-#Calculate Prop VEG using NDVI's min max, Use propveg to calculate the LSE:
-PROPVEG = Square(((Raster(NDVI)) - (NDVI_min)) / ((NDVI_max - (NDVI_min))))
+    user_folder = arcpy.GetParameterAsText(0)
+    products = arcpy.GetParameterAsText(1)
+    products_list = products.split(';')
+    mask_feature = arcpy.GetParameterAsText(2)
+    average_b11 = arcpy.GetParameterAsText(3)
 
-LSE = (0.004 * PROPVEG) + 0.986
+    B3 = data_dict['B3']
+    B4 = data_dict['B4']
+    B5 = data_dict['B5']
+    B6 = data_dict['B6']
+    B10 = data_dict['B10']
+    B11 = data_dict['B11']
+    metadata = data_dict['metadata']
 
-#Use the LSE to estimate the LST of band 10, 11:
-BAND10LST = (BAND10SATTEMP / (1 + (10.895 * (BAND10SATTEMP/14380)) * (Ln(LSE))))
-BAND11LST = (BAND11SATTEMP / (1 + (12.005 * (BAND11SATTEMP/14380)) * (Ln(LSE))))
+    bands_data_dict = get_data_fromFolder(in_folder)
 
-LST_CALC = BAND10LST
+    if mask_feature != '':
+        bands_masked_datadict = mask_bands(mask_feature, gdb_path, bands_data_dict)
+        B3 = bands_masked_datadict['B3']
+        B4 = bands_masked_datadict['B4']
+        B5 = bands_masked_datadict['B5']
+        B6 = bands_masked_datadict['B6']
+        B10 = bands_masked_datadict['B10']
+        B11 = bands_masked_datadict['B11']
 
-if average_b11 == 'true':
-    #Find mean LST:
-    LST_CALC = (BAND10LST + BAND11LST)/2
+    variable_name_list = ['DATE_ACQUIRED', 'SCENE_CENTER_TIME', 'SUN_ELEVATION',
+                            'RADIANCE_MULT_BAND_10', 'RADIANCE_MULT_BAND_11', 
+                            'RADIANCE_ADD_BAND_10','RADIANCE_ADD_BAND_11',
+                            'REFLECTANCE_MULT_BAND_3', 'REFLECTANCE_MULT_BAND_4', 
+                            'REFLECTANCE_MULT_BAND_5', 'REFLECTANCE_MULT_BAND_6',
+                            'REFLECTANCE_ADD_BAND_3','REFLECTANCE_ADD_BAND_4', 
+                            'REFLECTANCE_ADD_BAND_5', 'REFLECTANCE_ADD_BAND_6', 
+                            'K1_CONSTANT_BAND_10','K2_CONSTANT_BAND_10', 
+                            'K1_CONSTANT_BAND_11', 'K2_CONSTANT_BAND_11']
 
-LST_MEAN_PATH = os.path.join(gdb_path,'LST_' + SCENE_CENTER_TIME + 'GMT_' + DATE_ACQUIRED)
-LST_CALC.save(LST_MEAN_PATH)
+    metadata_clean = scrap_metadatafile(input_metadata, variable_name_list)
 
-LST = LST_MEAN_PATH
+    DATE_ACQUIRED = metadata_clean[0].replace('-', '')
+    SCENE_CENTER_TIME = (metadata_clean[1][1:-1]
+                        .split('.')[0]
+                        .replace(':', ''))
 
-#Add NDVI and LST to map:
-if 'NDVI' in products_list:
-    aprxMap.addDataFromPath(NDVI)
-if 'MNDWI' in products_list:
-    aprxMap.addDataFromPath(MNDWI)
-if 'NDISI' in products_list:
-    aprxMap.addDataFromPath(NDISI)
-if 'LST' in products_list:
-    aprxMap.addDataFromPath(LST)
+    noDates_variable_name_list = variable_name_list[2:]
+    noDates_scraped_data = metadata_clean[2:]
+    floats_variable_list = [float(i) for i in noDates_scraped_data]
+
+    variables_dict = dict(zip(noDates_variable_name_list, floats_variable_list))
+    corrected_sun_elev = float(numpy.sin(numpy.deg2rad(variables_dict['SUN_ELEVATION'])))
+
+    #calculate MNDWI
+    MNDWI, SWIR1_REF, NIR_REF = calculate_MNDWI(variables_dict, corrected_sun_elev, 
+                                                gdb_path, DATE_ACQUIRED, SCENE_CENTER_TIME)
+
+    #Calculate NDISI
+    NDISI = calculate_NDISI(variables_dict, MNDWI, SWIR1_REF, 
+                            NIR_REF, gdb_path, DATE_ACQUIRED, 
+                            SCENE_CENTER_TIME)
+
+    #Calculate NDVI
+    NDVI = calculate_NDVI(variables_dict, NIR_REF, corrected_sun_elev, 
+                            gdb_path, DATE_ACQUIRED, SCENE_CENTER_TIME)
+
+    #get min and max values
+    NDVI_max = get_NDVI_MinOrMax(NDVI, max=True)
+    NDVI_min = get_NDVI_MinOrMax(NDVI, max=False)
+
+    # calculate brightness temp
+    BAND10SATTEMP = calculate_sat_temp(variables_dict, B10)
+    BAND11SATTEMP = calculate_sat_temp(variables_dict, B11)
+
+    #propveg
+    PROPVEG = get_propveg(NDVI, NDVI_min, NDVI_max)
+
+    #calculate LSE
+    LSE = calculate_LSE(in_propveg)
+
+    #calculate LST
+    BAND10LST, BAND11LST = calculate_LST(BAND10SATTEMP, BAND11SATTEMP, LSE)
+
+    LST = BAND10LST
+
+    if average_b11 == 'true':
+        #Find mean LST:
+        LST = (BAND10LST + BAND11LST)/2
+    
+    LST_MEAN_PATH = os.path.join(gdb_path, f'LST_{SCENE_CENTER_TIME}GMT_{DATE_ACQUIRED}')
+    LST.save(LST_MEAN_PATH)
+    LST = LST_MEAN_PATH
+
+    #Add NDVI and LST to map:
+    if 'NDVI' in products_list:
+        aprxMap.addDataFromPath(NDVI)
+    if 'MNDWI' in products_list:
+        aprxMap.addDataFromPath(MNDWI)
+    if 'NDISI' in products_list:
+        aprxMap.addDataFromPath(NDISI)
+    if 'LST' in products_list:
+        aprxMap.addDataFromPath(LST)
