@@ -164,7 +164,7 @@ def calculate_LST(in_B10_sat_temp, in_B11_sat_temp, in_LSE):
 
 if __name__ == "__main__":
     aprxMap = arcpy.mp.ArcGISProject('CURRENT').listMaps()[0]
-    gdb_path = aprx.defaultGeodatabase
+    gdb_path = arcpy.env.workspace
 
     user_folder = arcpy.GetParameterAsText(0)
     products = arcpy.GetParameterAsText(1)
