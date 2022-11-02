@@ -171,16 +171,16 @@ if __name__ == "__main__":
     products_list = products.split(';')
     mask_feature = arcpy.GetParameterAsText(2)
     average_b11 = arcpy.GetParameterAsText(3)
-
-    B3 = data_dict['B3']
-    B4 = data_dict['B4']
-    B5 = data_dict['B5']
-    B6 = data_dict['B6']
-    B10 = data_dict['B10']
-    B11 = data_dict['B11']
-    metadata = data_dict['metadata']
-
+    
     bands_data_dict = get_data_fromFolder(in_folder)
+    
+    B3 = bands_data_dict['B3']
+    B4 = bands_data_dict['B4']
+    B5 = bands_data_dict['B5']
+    B6 = bands_data_dict['B6']
+    B10 = bands_data_dict['B10']
+    B11 = bands_data_dict['B11']
+    metadata = bands_data_dict['metadata']
 
     if mask_feature != '':
         bands_masked_datadict = mask_bands(mask_feature, gdb_path, bands_data_dict)
