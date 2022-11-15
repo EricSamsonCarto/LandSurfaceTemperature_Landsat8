@@ -19,7 +19,10 @@
 </div>
 
 <br>
-<b>Update 11/15/2022</b>: This script tool only currently works with: Landsat Collection 2 Level-1 Product Bundle. Level-2 bundles will not work correctly at the moment. <br>
+<b>Update 11/15/2022</b>: This script tool only currently works with: Landsat Collection 2 Level-1 Product Bundle. Level-2 bundles will not work correctly at the moment. 
+
+<br>
+<br>
 
   Description: This script estimates the LST and the NDISI of a user's 
   inputted Landsat 8 Bands, with optional outputs of NDVI and MNDWI.
