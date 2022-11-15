@@ -1,12 +1,3 @@
-import os
-import numpy
-import arcpy
-
-from arcpy.sa import *
-
-arcpy.env.overwriteOutput = True
-arcpy.env.addOutputsToMap = False
-
 """----------------------------------------------------------------------
     Script Name: Land Surface Temperature from Landsat8 Bands
     Description: This script estimates the LST and the NDISI of a user's 
@@ -28,6 +19,12 @@ arcpy.env.addOutputsToMap = False
     Date:        5/21/2020.
     Last Update: 11/03/2021.
 ------------------------------------------------------------------"""
+
+import os
+import numpy
+import arcpy
+
+from arcpy.sa import *
 
 def get_data_fromFolder(in_folder):
     data_dict = {}
@@ -74,7 +71,7 @@ def scrape_metadatafile(input_metadata, in_variables):
                 if variable in x:
                     scrape_lines.append(x.rstrip('\n').strip())
 
-    return [x.split('=')[1].strip() for x in scrap_lines]
+    return [x.split('=')[1].strip() for x in scrape_lines]
 
 def calculate_MNDWI(in_datadict, in_sun_elev, out_gdb, in_date_acquired, in_scene_center_time):
     """calculate green band and SWIR1 band, then create MNDWI based off of these rasters"""
@@ -163,6 +160,9 @@ def calculate_LST(in_B10_sat_temp, in_B11_sat_temp, in_LSE):
         return BAND10LST, BAND11LST
 
 if __name__ == "__main__":
+    arcpy.env.overwriteOutput = True
+    arcpy.env.addOutputsToMap = False
+
     aprxMap = arcpy.mp.ArcGISProject('CURRENT').listMaps()[0]
     gdb_path = arcpy.env.workspace
 
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     mask_feature = arcpy.GetParameterAsText(2)
     average_b11 = arcpy.GetParameterAsText(3)
     
-    bands_data_dict = get_data_fromFolder(in_folder)
+    bands_data_dict = get_data_fromFolder(user_folder)
     
     B3 = bands_data_dict['B3']
     B4 = bands_data_dict['B4']
@@ -201,7 +201,7 @@ if __name__ == "__main__":
                             'K1_CONSTANT_BAND_10','K2_CONSTANT_BAND_10', 
                             'K1_CONSTANT_BAND_11', 'K2_CONSTANT_BAND_11']
 
-    metadata_clean = scrap_metadatafile(input_metadata, variable_name_list)
+    metadata_clean = scrape_metadatafile(metadata, variable_name_list)
 
     DATE_ACQUIRED = metadata_clean[0].replace('-', '')
     SCENE_CENTER_TIME = (metadata_clean[1][1:-1]
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     PROPVEG = get_propveg(NDVI, NDVI_min, NDVI_max)
 
     #calculate LSE
-    LSE = calculate_LSE(in_propveg)
+    LSE = calculate_LSE(PROPVEG)
 
     #calculate LST
     BAND10LST, BAND11LST = calculate_LST(BAND10SATTEMP, BAND11SATTEMP, LSE)
