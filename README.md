@@ -24,9 +24,9 @@
 <br>
 <br>
 
-  Description: This script estimates the LST and the NDISI of a user's 
-  inputted Landsat 8 Bands, with optional outputs of NDVI and MNDWI.
-  It only works for Landsat 8 bands. The tool requires a full path to 
+  Description: This script estimates the LST of a user's 
+  inputted Landsat 8 Bands, with optional outputs of NDVI, MNDWI, NDISI.
+  It only works for Landsat 8 bands and only from the Level-1 Product Bundle. The tool requires a full path to 
   a folder that contains the band's 3, 4, 5, 6, 10, and 11. The MTL metadata 
   file associated with the bands is also required. 
   The zip file of L8 data will contain the *MTL.txt file:
