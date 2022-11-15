@@ -19,6 +19,8 @@
 </div>
 
 <br>
+<b>Update 11/15/2022</b>: This script tool only currently works with: Landsat Collection 2 Level-1 Product Bundle. Level-2 bundles will not work correctly at the moment. <br>
+
   Description: This script estimates the LST and the NDISI of a user's 
   inputted Landsat 8 Bands, with optional outputs of NDVI and MNDWI.
   It only works for Landsat 8 bands. The tool requires a full path to 
@@ -35,7 +37,7 @@
   The Temperature raster will be in celsius.
 
   For more documentation and methodology, please visit:<br>
-  https://ericsamson.com/Python/LandSurfaceTemp/LandSurfaceTemperature.html
+  https://ericsamson.com/projects/Python-LandSurfaceTemperature.html
 
   </div>
 
