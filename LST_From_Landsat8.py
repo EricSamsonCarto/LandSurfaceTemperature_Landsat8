@@ -67,6 +67,8 @@ def mask_bands(in_mask_feature, out_gdb, in_bands_datadict):
         mask_extract = arcpy.sa.ExtractByMask(in_bands_datadict[band], in_mask_feature)
         mask_extract.save(mask_out)
         band_masks[band] = mask_out
+    
+    return band_masks
 
 
 def scrape_metadatafile(input_metadata, in_variables):
